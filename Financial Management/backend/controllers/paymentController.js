@@ -176,7 +176,9 @@ const createMockBooking = async (req, res) => {
 const updateBooking = async (req, res) => {
     try {
         const booking = await Booking.findById(req.params.id);
-        if (!booking) return res.status(404).json({ message: 'Booking not found' });
+        if (!booking) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
         
         if (booking.studentId.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Unauthorized' });
@@ -193,6 +195,7 @@ const updateBooking = async (req, res) => {
         await booking.save();
         res.json({ message: 'Lesson request updated', booking });
     } catch (error) {
+        console.error('Error in updateBooking:', error);
         res.status(500).json({ message: 'Error updating lesson' });
     }
 };

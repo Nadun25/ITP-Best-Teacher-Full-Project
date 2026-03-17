@@ -33,7 +33,12 @@ const StudentDashboard = () => {
   const validateForm = (data) => {
     const newErrors = {};
     if (!data.subject?.trim()) newErrors.subject = 'Subject is required';
-    if (!data.teacherName?.trim()) newErrors.teacherName = 'Teacher name is required';
+    
+    // Teacher name is only required for new mock bookings, not for editing existing ones
+    if (!data._id && !data.teacherName?.trim()) {
+      newErrors.teacherName = 'Teacher name is required';
+    }
+    
     if (!data.amount || isNaN(data.amount) || Number(data.amount) <= 0) {
       newErrors.amount = 'Valid amount > 0 is required';
     }

@@ -268,3 +268,13 @@ a:hover {
   max-width: 400px;
   width: 100%;
 }
+
+.error-text { 
+  color: var(--error); 
+  font-size: 0.875rem; 
+  margin-top: 4px; 
+} 
+
+.input-error { 
+  border-color: var(--error) !important; 
+}

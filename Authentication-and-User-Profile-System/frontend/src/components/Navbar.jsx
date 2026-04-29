@@ -18,6 +18,9 @@ const Navbar = () => {
         <div className="nav-links">
           {user ? (
             <>
+              {user.role === 'admin' && (
+                <Link to="/admin-dashboard" className="nav-link">Dashboard</Link>
+              )}
               <Link to="/profile" className="nav-link">Profile</Link>
               <button onClick={handleLogout} className="btn" style={{ padding: '8px 16px', width: 'auto' }}>
                 Logout

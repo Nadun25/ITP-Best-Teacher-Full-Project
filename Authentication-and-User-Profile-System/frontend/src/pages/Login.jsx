@@ -79,6 +79,10 @@ const Login = () => {
           />
         </div>
         
+        <div style={{ textAlign: 'right', marginTop: '-10px', marginBottom: '20px' }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); alert('Please contact support to reset your password.'); }} style={{ fontSize: '0.875rem' }}>Forgot Password?</a>
+        </div>
+
         <button type="submit" className="btn" disabled={loading}>
           {loading ? 'Logging in...' : 'Sign In'}
         </button>

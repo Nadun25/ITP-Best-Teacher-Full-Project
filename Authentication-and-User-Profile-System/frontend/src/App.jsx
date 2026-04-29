@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import ChangePassword from './pages/ChangePassword';
+import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -26,6 +27,11 @@ const App = () => {
             <Route path="/change-password" element={
               <PrivateRoute>
                 <ChangePassword />
+              </PrivateRoute>
+            } />
+            <Route path="/admin-dashboard" element={
+              <PrivateRoute>
+                <AdminDashboard />
               </PrivateRoute>
             } />
           </Routes>

@@ -22,4 +22,12 @@ router.put('/change-password', changePasswordValidation, validateRequest, change
 
 router.delete('/delete-account', deleteUserAccount);
 
+const { getAllUsers, deleteUserByAdmin } = require('../controllers/userController');
+
+router.route('/')
+    .get(getAllUsers);
+
+router.route('/:id')
+    .delete(deleteUserByAdmin);
+
 module.exports = router;

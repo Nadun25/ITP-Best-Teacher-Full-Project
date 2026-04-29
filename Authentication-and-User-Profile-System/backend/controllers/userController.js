@@ -84,6 +84,34 @@ exports.deleteUserAccount = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Get all users (admin only)
+// @route   GET /api/users
+// @access  Private/Admin
+exports.getAllUsers = asyncHandler(async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Not authorized as an admin' });
+    }
+    const users = await User.find({});
+    res.json(users);
+});
+
+// @desc    Delete user by admin
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
+exports.deleteUserByAdmin = asyncHandler(async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Not authorized as an admin' });
+    }
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+        await User.deleteOne({ _id: user._id });
+        res.json({ message: 'User removed by admin' });
+    } else {
+        res.status(404).json({ message: 'User not found' });
+    }
+});
+
 // Validation requirements
 exports.changePasswordValidation = [
     body('oldPassword', 'Old password is required').notEmpty(),

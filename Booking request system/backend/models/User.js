@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: { type: String, default: 'Mock User' },
   email: { type: String, default: 'mock@example.com' },
-  role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' }
+  role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
+  subjects: [{ type: String }],
+  modules: [{ type: String }]
 });
 
 const User = mongoose.model('User', userSchema);

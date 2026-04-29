@@ -17,6 +17,7 @@ import {
 import { School, Person, EventNote } from '@mui/icons-material';
 import MyBookingsPage from './pages/MyBookingsPage';
 import BookingRequestForm from './components/bookings/BookingRequestForm';
+import TeacherSelection from './components/bookings/TeacherSelection';
 import { BookingProvider } from './context/BookingContext';
 
 // Creating a custom premium theme
@@ -70,6 +71,7 @@ const theme = createTheme({
 
 function App() {
   const [showForm, setShowForm] = useState(false);
+  const [selectedTeacherId, setSelectedTeacherId] = useState(null);
   const [activeRole, setActiveRole] = useState(localStorage.getItem('mockRole') || 'student');
 
   React.useEffect(() => {
@@ -83,7 +85,10 @@ function App() {
       setActiveRole(newRole);
       localStorage.setItem('mockRole', newRole);
       // Let's close the form if switching to teacher, as teachers don't request bookings in this scope
-      if (newRole === 'teacher') setShowForm(false);
+      if (newRole === 'teacher') {
+        setShowForm(false);
+        setSelectedTeacherId(null);
+      }
     }
   };
 
@@ -146,7 +151,14 @@ function App() {
                 color="primary"
                 size="large"
                 startIcon={<EventNote />}
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => {
+                  if (showForm) {
+                    setShowForm(false);
+                    setSelectedTeacherId(null);
+                  } else {
+                    setShowForm(true);
+                  }
+                }}
                 sx={{ px: 4, py: 1.5, borderRadius: 2 }}
               >
                 {showForm ? 'Cancel Request' : 'Book a Lesson'}
@@ -157,10 +169,18 @@ function App() {
           {/* Conditional UI */}
           {showForm && activeRole === 'student' ? (
             <Box mb={6} sx={{ animation: 'fadeIn 0.4s ease-in' }}>
-              <BookingRequestForm 
-                teacherId="651edc4e1a2b3c4d5e6f7a8b" /* Mock Teacher ID */
-                onClose={() => setShowForm(false)} 
-              />
+              {!selectedTeacherId ? (
+                <TeacherSelection onSelectTeacher={id => setSelectedTeacherId(id)} />
+              ) : (
+                <BookingRequestForm 
+                  teacherId={selectedTeacherId}
+                  onClose={() => {
+                    setShowForm(false);
+                    setSelectedTeacherId(null);
+                  }} 
+                  onBack={() => setSelectedTeacherId(null)}
+                />
+              )}
             </Box>
           ) : null}
 

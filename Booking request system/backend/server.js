@@ -17,7 +17,9 @@ require('./models/User');
 
 // Main Routes
 const bookingRoutes = require('./routes/bookingRoutes');
+const teacherRoutes = require('./routes/teacherRoutes');
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/teachers', teacherRoutes);
 
 // Centralized Error Middleware
 const errorHandler = require('./middleware/errorMiddleware');

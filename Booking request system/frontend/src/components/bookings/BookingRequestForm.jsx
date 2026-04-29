@@ -16,7 +16,7 @@ import {
 import { CalendarToday, AccessTime, Comment, Send } from '@mui/icons-material';
 import { useBooking } from '../../context/BookingContext';
 
-const BookingRequestForm = ({ teacherId, onClose, initialData = null }) => {
+const BookingRequestForm = ({ teacherId, onClose, onBack, initialData = null }) => {
   const { submitBooking, editBooking, error: contextError } = useBooking();
 
   const [date, setDate] = useState(initialData ? initialData.date.split('T')[0] : '');
@@ -111,8 +111,8 @@ const BookingRequestForm = ({ teacherId, onClose, initialData = null }) => {
       {!isEdit && (
         <Box mb={5} display={{ xs: 'none', sm: 'block' }}>
           <Stepper activeStep={1} alternativeLabel>
-            <Step completed><StepLabel>Choose Teacher</StepLabel></Step>
-            <Step><StepLabel>Pick Time & Request</StepLabel></Step>
+            <Step completed onClick={onBack} sx={{ cursor: 'pointer' }}><StepLabel>Choose Teacher</StepLabel></Step>
+            <Step active><StepLabel>Pick Time & Request</StepLabel></Step>
             <Step><StepLabel>Teacher Approval</StepLabel></Step>
           </Stepper>
         </Box>
@@ -204,13 +204,26 @@ const BookingRequestForm = ({ teacherId, onClose, initialData = null }) => {
         <Divider sx={{ my: 4 }} />
 
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Button 
-            color="inherit" 
-            onClick={onClose}
-            disabled={loading || success}
-          >
-            Cancel
-          </Button>
+          <Box display="flex" gap={2}>
+            <Button 
+              color="inherit" 
+              onClick={onClose}
+              disabled={loading || success}
+            >
+              Cancel
+            </Button>
+            {!isEdit && onBack && (
+              <Button 
+                color="secondary" 
+                onClick={onBack}
+                disabled={loading || success}
+                variant="outlined"
+                sx={{ borderRadius: 8 }}
+              >
+                Back to Teachers
+              </Button>
+            )}
+          </Box>
 
           <Button
             type="submit"

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ticketService from '../services/ticketService';
+import userService from '../services/userService';
 
 const CreateTicket = () => {
     const [formData, setFormData] = useState({
@@ -11,12 +12,41 @@ const CreateTicket = () => {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [users, setUsers] = useState([]);
+    const [fetchingUsers, setFetchingUsers] = useState(false);
     
     const navigate = useNavigate();
-    const token = localStorage.getItem('token'); // Simplification for demo
+    const token = localStorage.getItem('token');
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+
+    React.useEffect(() => {
+        const fetchUsers = async () => {
+            if (formData.recipientType === 'Admin') {
+                setUsers([]);
+                return;
+            }
+            setFetchingUsers(true);
+            try {
+                const results = await userService.getUsers({ 
+                    role: formData.recipientType.toLowerCase() 
+                });
+                setUsers(results);
+                // Reset recipientId if the current one is not in the new list
+                if (results.length > 0) {
+                    setFormData(prev => ({ ...prev, recipientId: '' }));
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setFetchingUsers(false);
+            }
+        };
+        fetchUsers();
+    }, [formData.recipientType]);
 
     const onChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
     };
 
     const validateForm = () => {
@@ -36,6 +66,10 @@ const CreateTicket = () => {
             setError('Description must be at least 20 characters to help us understand the issue');
             return false;
         }
+        if (formData.recipientType !== 'Admin' && !formData.recipientId) {
+            setError('Please select a specific user');
+            return false;
+        }
         return true;
     };
 
@@ -49,9 +83,8 @@ const CreateTicket = () => {
 
         try {
             const submitData = { ...formData };
-            // For Simulation: If recipient is Teacher and no ID provided, use our seeded Prof. Smith ID
-            if (submitData.recipientType === 'Teacher' && !submitData.recipientId) {
-                submitData.recipientId = '640f1a2b3c4d5e6f7a8b9c02';
+            if (submitData.recipientType === 'Admin') {
+                delete submitData.recipientId;
             }
 
             await ticketService.createTicket(submitData, token);
@@ -79,17 +112,41 @@ const CreateTicket = () => {
                     )}
 
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Recipient</label>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Recipient Role</label>
                         <select
                             name="recipientType"
                             value={formData.recipientType}
                             onChange={onChange}
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                         >
-                            <option value="Teacher">Specific Teacher</option>
+                            <option value="Teacher">Teacher</option>
+                            {currentUser?.role === 'admin' && <option value="Student">Student</option>}
                             <option value="Admin">Platform Administration</option>
                         </select>
                     </div>
+
+                    {formData.recipientType !== 'Admin' && (
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Select {formData.recipientType}</label>
+                            {fetchingUsers ? (
+                                <div className="text-sm text-gray-500 py-2">Loading {formData.recipientType.toLowerCase()}s...</div>
+                            ) : (
+                                <select
+                                    name="recipientId"
+                                    value={formData.recipientId}
+                                    onChange={onChange}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                                >
+                                    <option value="">Select a {formData.recipientType.toLowerCase()}</option>
+                                    {users.map(user => (
+                                        <option key={user._id} value={user._id}>
+                                            {user.name} ({user.email})
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Subject</label>

@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const reviewRoutes = require('./src/routes/reviewRoutes');
 const ticketRoutes = require('./src/routes/ticketRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 // Routes
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/', (req, res) => {
     res.send('Best Teacher Reviews & Support API is running...');

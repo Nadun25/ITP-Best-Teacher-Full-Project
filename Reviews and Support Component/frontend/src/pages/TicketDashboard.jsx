@@ -7,6 +7,7 @@ const TicketDashboard = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [view, setView] = useState('received'); // 'received' or 'sent'
+    const [statusFilter, setStatusFilter] = useState('All');
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -45,19 +46,36 @@ const TicketDashboard = () => {
         fetchTickets();
     }, [token, view]);
 
+    const filteredTickets = tickets.filter(ticket => 
+        statusFilter === 'All' || ticket.status === statusFilter
+    );
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Support Tickets</h1>
                     <p className="text-gray-500">Track and manage your inquiries</p>
                 </div>
-                <Link 
-                    to="/create-ticket" 
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
-                >
-                    New Ticket
-                </Link>
+                <div className="flex gap-4 items-center">
+                    <select 
+                        value={statusFilter} 
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                    >
+                        <option value="All">All Statuses</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                    <Link 
+                        to="/create-ticket" 
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg whitespace-nowrap"
+                    >
+                        New Ticket
+                    </Link>
+                </div>
             </div>
 
             {/* Teacher Tabs */}
@@ -82,9 +100,9 @@ const TicketDashboard = () => {
                 <div className="flex justify-center py-20">
                     <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-500"></div>
                 </div>
-            ) : tickets.length > 0 ? (
+            ) : filteredTickets.length > 0 ? (
                 <div className="grid gap-2">
-                    {tickets.map(ticket => (
+                    {filteredTickets.map(ticket => (
                         <TicketCard key={ticket._id} ticket={ticket} />
                     ))}
                 </div>

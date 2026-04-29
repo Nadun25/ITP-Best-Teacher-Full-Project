@@ -4,6 +4,7 @@ import TeacherProfile from './pages/TeacherProfile';
 import CreateTicket from './pages/CreateTicket';
 import TicketDashboard from './pages/TicketDashboard';
 import TicketDetail from './pages/TicketDetail';
+import CreateReview from './pages/CreateReview';
 
 import RoleSelector from './components/RoleSelector';
 
@@ -26,12 +27,14 @@ function App() {
             {role === 'student' && (
               <>
                 <Link to="/teacher/640f1a2b3c4d5e6f7a8b9c02" className="hover:text-blue-600 transition-colors">Find Teachers</Link>
+                <Link to="/create-review" className="hover:text-blue-600 transition-colors">Write Review</Link>
                 <Link to="/tickets" className="hover:text-blue-600 transition-colors">My Tickets</Link>
                 <Link to="/create-ticket" className="hover:text-blue-600 transition-colors">Support</Link>
               </>
             )}
             {role === 'teacher' && (
               <>
+                <Link to="/teacher/640f1a2b3c4d5e6f7a8b9c02" className="hover:text-blue-600 transition-colors">My Profile</Link>
                 <Link to="/tickets" className="hover:text-blue-600 transition-colors">Student Inquiries</Link>
                 <Link to="/create-ticket" className="hover:text-blue-600 transition-colors">Support (to Admin)</Link>
               </>
@@ -39,6 +42,7 @@ function App() {
             {role === 'admin' && (
               <>
                 <Link to="/tickets" className="hover:text-blue-600 transition-colors">All Tickets</Link>
+                <Link to="/create-ticket" className="hover:text-blue-600 transition-colors">Message Users</Link>
               </>
             )}
             {!role && <span className="text-gray-400">Please select a role above to start</span>}
@@ -77,6 +81,7 @@ function App() {
             <Route path="/create-ticket" element={<CreateTicket />} />
             <Route path="/tickets" element={<TicketDashboard />} />
             <Route path="/tickets/:id" element={<TicketDetail />} />
+            <Route path="/create-review" element={<CreateReview />} />
           </Routes>
         </main>
       </div>

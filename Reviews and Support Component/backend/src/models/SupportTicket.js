@@ -8,7 +8,7 @@ const supportTicketSchema = new mongoose.Schema({
     },
     recipientType: {
         type: String,
-        enum: ['Teacher', 'Admin'],
+        enum: ['Teacher', 'Admin', 'Student'],
         required: true
     },
     recipientId: {

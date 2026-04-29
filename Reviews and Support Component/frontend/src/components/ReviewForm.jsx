@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import reviewService from '../services/reviewService';
+import userService from '../services/userService';
 import StarRating from './StarRating';
 
 const ReviewForm = ({ teacherId, onReviewSubmitted }) => {
@@ -8,9 +9,34 @@ const ReviewForm = ({ teacherId, onReviewSubmitted }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    
+    const [teachers, setTeachers] = useState([]);
+    const [fetchingTeachers, setFetchingTeachers] = useState(false);
+    const [selectedTeacherId, setSelectedTeacherId] = useState(teacherId || '');
 
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
+
+    React.useEffect(() => {
+        if (!teacherId) {
+            const fetchTeachers = async () => {
+                setFetchingTeachers(true);
+                try {
+                    const results = await userService.getUsers({ role: 'teacher' });
+                    setTeachers(results);
+                } catch (err) {
+                    console.error(err);
+                } finally {
+                    setFetchingTeachers(false);
+                }
+            };
+            fetchTeachers();
+        }
+    }, [teacherId]);
+
+    const handleTeacherSelect = (e) => {
+        setSelectedTeacherId(e.target.value);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,6 +44,10 @@ const ReviewForm = ({ teacherId, onReviewSubmitted }) => {
         setSuccess(false);
 
         // Frontend Validation
+        if (!selectedTeacherId) {
+            setError('Please select a teacher');
+            return;
+        }
         if (rating === 0) {
             setError('Please select a star rating');
             return;
@@ -34,7 +64,7 @@ const ReviewForm = ({ teacherId, onReviewSubmitted }) => {
         setLoading(true);
         try {
             await reviewService.createReview({
-                teacherId,
+                teacherId: selectedTeacherId,
                 lessonId: 'lesson-' + Math.random().toString(36).substring(7),
                 rating,
                 comment: comment.trim()
@@ -67,6 +97,28 @@ const ReviewForm = ({ teacherId, onReviewSubmitted }) => {
                 {success && (
                     <div className="bg-green-50 text-green-600 p-4 rounded-xl text-sm border border-green-100">
                         Thank you! Your review has been submitted successfully.
+                    </div>
+                )}
+
+                {!teacherId && (
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">Select Teacher</label>
+                        {fetchingTeachers ? (
+                            <div className="text-sm text-gray-500 py-2">Loading teachers...</div>
+                        ) : (
+                            <select
+                                value={selectedTeacherId}
+                                onChange={handleTeacherSelect}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                            >
+                                <option value="">Select a teacher</option>
+                                {teachers.map(t => (
+                                    <option key={t._id} value={t._id}>
+                                        {t.name} ({t.email})
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                 )}
 

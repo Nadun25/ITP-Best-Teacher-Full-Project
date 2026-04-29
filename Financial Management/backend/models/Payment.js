@@ -18,6 +18,18 @@ const PaymentSchema = new mongoose.Schema({
   },
   paidAt: {
     type: Date
+  },
+  subject: {
+    type: String
+  },
+  grade: {
+    type: String
+  },
+  teacherName: {
+    type: String
+  },
+  amount: {
+    type: Number
   }
 }, {
   timestamps: true

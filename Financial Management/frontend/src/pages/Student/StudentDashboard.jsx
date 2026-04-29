@@ -4,6 +4,8 @@ import Header from '../../components/Header';
 import StatCard from '../../components/StatCard';
 import { CreditCard, History, FileText, CheckCircle, Clock, Plus, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+const gradeOptions = ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12', 'Grade 13'];
+const teacherOptions = ['Demo Teacher', 'Dr. Smith', 'Prof. Johnson', 'Mrs. Davis', 'Mr. Wilson'];
 
 const StudentDashboard = () => {
   // Data states for transactions, invoices, and pending bookings
@@ -14,7 +16,7 @@ const StudentDashboard = () => {
   
   // UI and Form control states
   const [showForm, setShowForm] = useState(false);
-  const [newLesson, setNewLesson] = useState({ subject: '', amount: '', teacherName: 'Demo Teacher' });
+  const [newLesson, setNewLesson] = useState({ subject: '', amount: '', grade: 'Grade 10', teacherName: 'Demo Teacher' });
   const [editingBooking, setEditingBooking] = useState(null);
   
   // Validation error states
@@ -37,6 +39,10 @@ const StudentDashboard = () => {
     // Teacher name is only required for new mock bookings, not for editing existing ones
     if (!data._id && !data.teacherName?.trim()) {
       newErrors.teacherName = 'Teacher name is required';
+    }
+
+    if (!data._id && !data.grade?.trim()) {
+      newErrors.grade = 'Grade is required';
     }
     
     if (!data.amount || isNaN(data.amount) || Number(data.amount) <= 0) {
@@ -79,7 +85,7 @@ const StudentDashboard = () => {
     try {
       setErrors({});
       await api.post('/payments/mock-booking', newLesson);
-      setNewLesson({ subject: '', amount: '', teacherName: 'Demo Teacher' });
+      setNewLesson({ subject: '', amount: '', grade: 'Grade 10', teacherName: 'Demo Teacher' });
       setShowForm(false);
       fetchData(); // Refresh dashboard
     } catch (err) {
@@ -145,7 +151,7 @@ const StudentDashboard = () => {
 
         {showForm && (
           <div className="card bg-brand-50/50 dark:bg-brand-900/10 border-brand-200 animate-in fade-in slide-in-from-top-4 duration-300">
-            <form onSubmit={handleCreateMock} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+            <form onSubmit={handleCreateMock} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Subject / Lesson</label>
                 <input 
@@ -162,16 +168,37 @@ const StudentDashboard = () => {
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Teacher Name</label>
-                <input 
-                  type="text" 
+                <select 
                   value={newLesson.teacherName} 
                   onChange={e => {
                     setNewLesson({...newLesson, teacherName: e.target.value});
                     if (errors.teacherName) setErrors({...errors, teacherName: null});
                   }}
                   className={`w-full p-2 rounded-lg border bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-colors ${errors.teacherName ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200 dark:border-slate-700'}`}
-                />
+                >
+                  <option value="">Select Teacher</option>
+                  {teacherOptions.map(teacher => (
+                    <option key={teacher} value={teacher}>{teacher}</option>
+                  ))}
+                </select>
                 {errors.teacherName && <p className="text-[10px] text-red-500 mt-1 font-semibold">{errors.teacherName}</p>}
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Grade</label>
+                <select 
+                  value={newLesson.grade} 
+                  onChange={e => {
+                    setNewLesson({...newLesson, grade: e.target.value});
+                    if (errors.grade) setErrors({...errors, grade: null});
+                  }}
+                  className={`w-full p-2 rounded-lg border bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-colors ${errors.grade ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200 dark:border-slate-700'}`}
+                >
+                  <option value="">Select Grade</option>
+                  {gradeOptions.map(grade => (
+                    <option key={grade} value={grade}>{grade}</option>
+                  ))}
+                </select>
+                {errors.grade && <p className="text-[10px] text-red-500 mt-1 font-semibold">{errors.grade}</p>}
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Amount ($)</label>
@@ -242,6 +269,7 @@ const StudentDashboard = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold text-slate-900 dark:text-white">{booking.subject}</h4>
+                        <p className="text-sm text-slate-500">Grade: {booking.grade || 'Grade 10'}</p>
                         <p className="text-sm text-slate-500">Teacher: {booking.teacherId?.name || 'Unknown'}</p>
                       </div>
                       <div className="text-right flex flex-col items-end gap-2">

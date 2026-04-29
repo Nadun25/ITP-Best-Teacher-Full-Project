@@ -33,28 +33,44 @@ const payBooking = async (req, res) => {
 
         const platformFee = (booking.amount * feePercentage) / 100;
         const teacherEarning = booking.amount - platformFee;
-        const transactionReference = `TXN-${uuidv4().slice(0, 8).toUpperCase()}`;
 
-        // Create Transaction
-        const transaction = await Transaction.create({
-            bookingId,
-            studentId: req.user._id,
-            teacherId: booking.teacherId,
-            amount: booking.amount,
-            platformFee,
-            teacherEarning,
-            paymentMethod: paymentMethod || 'demo-payment',
-            paymentStatus: 'completed',
-            transactionReference
-        });
+        // Find existing pending transaction
+        let transaction = await Transaction.findOne({ bookingId: booking._id, paymentStatus: 'pending' });
+        
+        if (!transaction) {
+            const transactionReference = `TXN-${uuidv4().slice(0, 8).toUpperCase()}`;
+            transaction = await Transaction.create({
+                bookingId,
+                studentId: req.user._id,
+                teacherId: booking.teacherId,
+                amount: booking.amount,
+                platformFee,
+                teacherEarning,
+                paymentMethod: paymentMethod || 'demo-payment',
+                paymentStatus: 'completed',
+                transactionReference
+            });
+        } else {
+            transaction.paymentStatus = 'completed';
+            transaction.paymentMethod = paymentMethod || 'demo-payment';
+            await transaction.save();
+        }
 
-        // Create Payment record
-        await Payment.create({
-            transactionId: transaction._id,
-            bookingId,
-            paymentStatus: 'completed',
-            paidAt: Date.now()
-        });
+        // Find existing pending payment
+        let payment = await Payment.findOne({ bookingId: booking._id, paymentStatus: 'pending' });
+        
+        if (!payment) {
+            await Payment.create({
+                transactionId: transaction._id,
+                bookingId,
+                paymentStatus: 'completed',
+                paidAt: Date.now()
+            });
+        } else {
+            payment.paymentStatus = 'completed';
+            payment.paidAt = Date.now();
+            await payment.save();
+        }
 
         // Generate Invoice
         const invoiceNumber = `INV-${Date.now()}-${uuidv4().slice(0, 4).toUpperCase()}`;
@@ -82,7 +98,7 @@ const payBooking = async (req, res) => {
 
         res.status(201).json({
             message: 'Payment completed successfully',
-            transactionReference,
+            transactionReference: transaction.transactionReference,
             invoiceNumber
         });
 
@@ -140,15 +156,15 @@ const getPendingBookings = async (req, res) => {
 // @route   POST /api/payments/mock-booking
 // @access  Private/Student
 const createMockBooking = async (req, res) => {
-    const { subject, amount, teacherName } = req.body;
+    const { subject, amount, teacherName, grade } = req.body;
 
     try {
-        // Find or create a mock teacher
-        let teacher = await User.findOne({ role: 'teacher', name: teacherName });
+        // Find the single demo teacher so that balances update consistently for the Teacher View
+        let teacher = await User.findOne({ email: 'demo-teacher@example.com' });
         if (!teacher) {
             teacher = await User.create({
-                name: teacherName || 'Demo Teacher',
-                email: `teacher-${Date.now()}@example.com`,
+                name: 'Demo Teacher',
+                email: 'demo-teacher@example.com',
                 password: 'hashed_password',
                 role: 'teacher'
             });
@@ -158,6 +174,7 @@ const createMockBooking = async (req, res) => {
             studentId: req.user._id,
             teacherId: teacher._id,
             subject: subject || 'New lesson',
+            grade: grade || 'Grade 10',
             amount: amount || 50,
             status: 'confirmed',
             paymentStatus: 'unpaid'

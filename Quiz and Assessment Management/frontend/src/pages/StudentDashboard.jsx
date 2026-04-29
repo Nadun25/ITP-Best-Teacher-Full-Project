@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { PlayCircle, CheckCircle, Clock, BookOpen, ChevronRight } from 'lucide-react';
+import { PlayCircle, CheckCircle, Clock, BookOpen, ChevronRight, Award, Target, TrendingUp, BarChart } from 'lucide-react';
 
 const StudentDashboard = ({ user }) => {
   const [availableQuizzes, setAvailableQuizzes] = useState([]);
@@ -31,11 +31,62 @@ const StudentDashboard = ({ user }) => {
 
   if (loading) return <div className="text-center py-20">Loading available quizzes...</div>;
 
+  const totalSubmissions = mySubmissions.length;
+  const totalScore = mySubmissions.reduce((sum, sub) => sum + (sub.score || 0), 0);
+  const averageScore = totalSubmissions > 0 ? (totalScore / totalSubmissions).toFixed(1) : 0;
+  const highestScore = mySubmissions.length > 0 ? Math.max(...mySubmissions.map(sub => sub.score || 0)) : 0;
+
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
       <div className="mb-10">
         <h2 className="text-3xl font-bold mb-2">Student Dashboard</h2>
         <p className="text-text-gray text-lg">Browse and tackle your upcoming assessments.</p>
+      </div>
+
+      {/* Student Insights Section */}
+      <div className="mb-12">
+        <h3 className="flex items-center gap-2 text-xl font-semibold mb-6 opacity-80">
+          <BarChart className="text-primary" size={24} /> 
+          Performance Insights
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="glass-card hover:border-primary/50 transition-colors flex items-center gap-4 p-5">
+            <div className="p-4 bg-primary/20 text-primary rounded-xl">
+              <BookOpen size={28} />
+            </div>
+            <div>
+              <p className="text-text-gray text-[10px] uppercase tracking-widest font-black mb-1">Quizzes Taken</p>
+              <p className="text-3xl font-black text-white">{totalSubmissions}</p>
+            </div>
+          </div>
+          <div className="glass-card hover:border-success/50 transition-colors flex items-center gap-4 p-5">
+            <div className="p-4 bg-success/20 text-success rounded-xl">
+              <Award size={28} />
+            </div>
+            <div>
+              <p className="text-text-gray text-[10px] uppercase tracking-widest font-black mb-1">Total Score</p>
+              <p className="text-3xl font-black text-white">{totalScore}</p>
+            </div>
+          </div>
+          <div className="glass-card hover:border-warning/50 transition-colors flex items-center gap-4 p-5">
+            <div className="p-4 bg-warning/20 text-warning rounded-xl">
+              <Target size={28} />
+            </div>
+            <div>
+              <p className="text-text-gray text-[10px] uppercase tracking-widest font-black mb-1">Average Score</p>
+              <p className="text-3xl font-black text-white">{averageScore}</p>
+            </div>
+          </div>
+          <div className="glass-card hover:border-error/50 transition-colors flex items-center gap-4 p-5">
+            <div className="p-4 bg-error/20 text-error rounded-xl">
+              <TrendingUp size={28} />
+            </div>
+            <div>
+              <p className="text-text-gray text-[10px] uppercase tracking-widest font-black mb-1">Highest Score</p>
+              <p className="text-3xl font-black text-white">{highestScore}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

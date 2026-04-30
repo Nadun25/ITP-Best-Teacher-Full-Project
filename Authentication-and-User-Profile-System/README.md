@@ -95,6 +95,11 @@ This system implements multiple layers of defensive validation to ensure data pu
    * Form submissions are halted on the React side if critical fields (Name, Contact, Email, Password) are blank.
    * `express-validator` utilizes `.notEmpty()` parameters ensuring blank overrides aren't physically possible via API spoofing tools (like Postman / Insomnia).
 
+## 🔑 Default Admin Credentials
+To access the Admin Dashboard, use the following pre-configured credentials:
+* **Email:** `admin@example.com`
+* **Password:** `password123`
+
 ## ⚙️ How to Run Locally
 
 ### 1. Prerequisites 
